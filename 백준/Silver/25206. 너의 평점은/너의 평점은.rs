@@ -1,5 +1,4 @@
 use std::io::{self, Read};
-use std::collections::HashMap;
 
 fn main() {
     // 입력부
@@ -7,28 +6,19 @@ fn main() {
     io::stdin().read_to_string(&mut input).unwrap();
     let mut tokens = input.split_ascii_whitespace();
 
-    let mut map = HashMap::new();
-    map.insert("A+", 4.5);
-    map.insert("A0", 4.0);
-    map.insert("B+", 3.5);
-    map.insert("B0", 3.0);
-    map.insert("C+", 2.5);
-    map.insert("C0", 2.0);
-    map.insert("D+", 1.5);
-    map.insert("D0", 1.0);
-    map.insert("F", 0.0);
-    map.insert("P", -1.0);
-
     let mut total_score = 0.0;
     let mut score_grade = 0.0;
 
     while let Some(token) = tokens.next() {
         let score: f64 = tokens.next().unwrap().parse().unwrap();
-        let grade = map[tokens.next().unwrap()];
-
-        if grade == -1.0 {
-            continue;
-        }
+        let grade = match tokens.next().unwrap().as_bytes() {
+            [b'P'] => continue,
+            [b'F'] => 0.0,
+            [letter @ b'A'..=b'D', modifier] => {
+                (b'E' - *letter) as f64 + if *modifier == b'+' { 0.5 } else { 0.0 }
+            }
+            _ => unreachable!(),
+        };
 
         total_score += score;
         score_grade += score * grade;
